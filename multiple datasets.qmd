@@ -4,21 +4,54 @@ format: html
 ---
 
 ```{r setup1, include=FALSE}
+
 here::i_am("dplyr-102.Rproj")
+
 library(here)
 library(vroom)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(knitr)
+
 theme_set(theme_bw())
 ```
 
 ## data loading
 ```{r setup2, include=FALSE}
+
 clients <- vroom(here("data","client.csv"))
 accounts <- vroom(here("data","account.csv"))
 disp <- vroom(here("data","disp.csv"))
+
 # check if the num of columns is logical/ if not, the delim is wrong
 ```
 
+## Join data tables
+
+### Inner Join
+
+```{r}
+da <- inner_join(accounts, disp)
+```
+
+We use `by = "account_id"` because `account_id` is the only variable with the same name in both datasets.
+
+Here, an inner join creates a new dataset by combining rows from two existing datasets, matching them based on the common attribute `account_id`.
+
+A match is considered valid if the values for `account_id` correspond between the datasets.
+
+This type of operation is also known as a "natural join" between the two tables.
+
+```{r}
+cda <- inner_join(clients, da, by = join_by(client_id), suffix = c("_home", "_bank"))
+```
+
+Ten percent of the missing associations are from people who don't have matching `client_id` and `district_id` values.
+
+
+`cda <- inner_join(clients, da, by = join_by(client_id), suffix = c("_home", "_bank"))`, the `suffix` option is used to differentiate between columns that have the same name in both datasets being joined.
+
+The `suffix` option takes a vector of two string values. The first string is appended to the end of the column names from the first dataset (in this case, `clients`), and the second string is appended to the end of the column names from the second dataset (here, `da`).
+
+For example, let's say both `clients` and `da` datasets have a column named `address`. After the inner join operation with the specified `suffix` options, these columns would be renamed to `address_home` and `address_bank` in the resulting dataset (`cda`). This way, you can easily identify which `address` column came from which original dataset.
