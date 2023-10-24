@@ -55,3 +55,59 @@ Ten percent of the missing associations are from people who don't have matching 
 The `suffix` option takes a vector of two string values. The first string is appended to the end of the column names from the first dataset (in this case, `clients`), and the second string is appended to the end of the column names from the second dataset (here, `da`).
 
 For example, let's say both `clients` and `da` datasets have a column named `address`. After the inner join operation with the specified `suffix` options, these columns would be renamed to `address_home` and `address_bank` in the resulting dataset (`cda`). This way, you can easily identify which `address` column came from which original dataset.
+
+### Home district vs bank district
+
+```{r}
+home_diff_bank <- cda |> filter(district_id_home != district_id_bank) |> nrow()
+
+```
+
+`r home_diff_bank` clients have a bank in another district as the one they live in (it can be an overestimation because of families that don't live together)
+
+```{r}
+cda |> 
+  group_by(account_id) |> 
+  distinct(district_id_home) |>
+  summarise(N=n()) |>
+  filter(N>1)
+  
+```
+
+see if people that share an acount but live in different district
+
+filter() is for a single row (doesn't work in this case): using group_by
+
+### Gender gap?
+
+```{r}
+clients |> count(gender)
+```
+
+```{r}
+clients |>
+  ggplot(aes(x=gender))+
+  geom_bar()+
+  coord_flip()
+```
+```{r}
+cda |> count(gender, type)
+```
+
+```{r}
+cda %>% 
+  count(gender) %>%
+  group_by(gender) |>
+  mutate(freq=n/sum(n)) |>
+  select(-n) |>
+  ungroup() |>
+  pivot_wider(values_from = freq, names_from = type)
+```
+
+```{r}
+cda|>
+  ggplot(aes(y=gender, fill=type)) + geom_bar()
+```
+```{r}
+chisq.test(x = cda %>% pull(gender), y = cda %>% pull(type))
+```
