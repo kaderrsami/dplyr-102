@@ -1,0 +1,24 @@
+---
+title: "working on multiple datasets"
+format: html
+---
+
+```{r setup1, include=FALSE}
+here::i_am("dplyr-102.Rproj")
+library(here)
+library(vroom)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+theme_set(theme_bw())
+```
+
+## data loading
+```{r setup2, include=FALSE}
+clients <- vroom(here("data","client.csv"))
+accounts <- vroom(here("data","account.csv"))
+disp <- vroom(here("data","disp.csv"))
+# check if the num of columns is logical/ if not, the delim is wrong
+```
+
